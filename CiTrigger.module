@@ -1,0 +1,55 @@
+<?php namespace ProcessWire;
+
+class CiTrigger extends WireData implements Module {
+
+  // public function __construct() {
+  //   echo "construct";
+  //   set_error_handler(array($this, 'handleErrorCallback'));
+  //   set_exception_handler(array($this, 'handleErrorCallback'));
+  // }
+  
+  public function init() {
+    $this->pages->addHookAfter('save', $this, 'setTrigger'); 
+    $this->addHook('LazyCron::everyDay', $this, 'triggerWebhook');
+  }
+
+  public function setTrigger(HookEvent $event) {
+    $page = $event->arguments(0);
+
+    // do nothing for system pages:
+    if ($page->template->flags === Template::flagSystem) return;
+    // do nothing if page is not public
+    if (!$page->isPublic) return;
+
+    // do nothing if trigger is already active:
+    if($this->trigger == true) return;
+
+    $data = $this->modules->getConfig($this->className);
+    $data['trigger'] = 1;
+    $this->modules->saveConfig($this->className, $data);
+
+    wire('log')->save("ci-trigger", "trigger activated");
+  }
+
+  public function triggerWebhook () {
+    // do nothing if trigger is not active:
+    if($this->trigger != true) {
+      wire('log')->save("ci-trigger", "Cronjub ran, but trigger was not active");
+      return;
+    }
+
+    $http = new WireHttp();
+    $response = $http->post($this->webhook);
+
+    if($response !== false) {
+      wire('log')->save("ci-trigger", "Webhook triggered");
+    } else {
+      wire('log')->save("ci-trigger", "Webhook failed:" . $http->getError());
+    }
+
+    // reset trigger:
+    $data = $this->modules->getConfig($this->className);
+    $data['trigger'] = 0;
+    $this->modules->saveConfig($this->className, $data);
+  }
+}
