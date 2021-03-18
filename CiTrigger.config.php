@@ -10,6 +10,14 @@ $config = array(
     'notes' => 'Make sure to input your url in a proper format like "http://mywebhooksomewhere.com"'
   ),
 
+  'timeInterval' => array(
+    'type' => 'text',
+    'label' => 'How often do you want to trigger the Webhook?',
+    'description' => "LazyCron time interval", 
+    'required' => true,
+    'notes' => 'Example values "everyMinute", "every2Hours", etc. Falls back to "everyDay" if omitted. Reference of usable values: https://processwire.com/docs/more/lazy-cron/'
+  ),
+
   'trigger' => array(
     'type' => 'checkbox',
     'label' => 'Trigger active',

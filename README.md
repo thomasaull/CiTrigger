@@ -1,6 +1,6 @@
 # CI Trigger Module
 
-This module triggers a webhook with a POST request once a day, if a page has been saved.
+This module triggers a webhook with a POST request at a set time interval, if a page has been saved.
 
 ### Lazycron
 

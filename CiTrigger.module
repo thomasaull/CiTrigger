@@ -7,10 +7,25 @@ class CiTrigger extends WireData implements Module {
   //   set_error_handler(array($this, 'handleErrorCallback'));
   //   set_exception_handler(array($this, 'handleErrorCallback'));
   // }
+
+  private function getTimeInterval() {
+    $timeInterval = 'everyDay';
+
+    $data = $this->modules->getConfig($this->className);
+    if($data['timeInterval']) {
+      $timeInterval = $data['timeInterval'];
+    }
+
+    return $timeInterval;
+  }
   
   public function init() {
-    $this->pages->addHookAfter('save', $this, 'setTrigger'); 
-    $this->addHook('LazyCron::everyDay', $this, 'triggerWebhook');
+    $this->pages->addHookAfter('save', $this, 'setTrigger');
+
+    $timeInterval = self::getTimeInterval();
+    $hook = "LazyCron::$timeInterval";
+
+    $this->addHook($hook, $this, 'triggerWebhook');
   }
 
   public function setTrigger(HookEvent $event) {
@@ -32,9 +47,11 @@ class CiTrigger extends WireData implements Module {
   }
 
   public function triggerWebhook () {
+    $timeInterval = self::getTimeInterval();
+
     // do nothing if trigger is not active:
     if($this->trigger != true) {
-      wire('log')->save("ci-trigger", "Cronjub ran, but trigger was not active");
+      wire('log')->save("ci-trigger", "Cronjub ($timeInterval) ran, but trigger was not active");
       return;
     }
 
@@ -42,7 +59,7 @@ class CiTrigger extends WireData implements Module {
     $response = $http->post($this->webhook);
 
     if($response !== false) {
-      wire('log')->save("ci-trigger", "Webhook triggered");
+      wire('log')->save("ci-trigger", "Webhook ($timeInterval) triggered");
     } else {
       wire('log')->save("ci-trigger", "Webhook failed:" . $http->getError());
     }
