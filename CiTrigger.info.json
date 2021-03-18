@@ -1,6 +1,6 @@
 {
   "title": "CiTrigger",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "summary": "A small helper module to trigger a CI pipeline at set time interval if your website has changed",
   "author": "Thomas Aull",
   "href": "http://www.thomasaull.de",
