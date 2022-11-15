@@ -12,7 +12,7 @@ class CiTrigger extends WireData implements Module {
     $timeInterval = 'everyDay';
 
     $data = $this->modules->getConfig($this->className);
-    if($data['timeInterval']) {
+    if(isset($data['timeInterval'])) {
       $timeInterval = $data['timeInterval'];
     }
 
